@@ -2,6 +2,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Spinner } from "flowbite-react";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   Form,
@@ -31,6 +32,7 @@ const formSchema = z.object({
 });
 
 const SignUpForm = () => {
+  const { toast } = useToast();
   const isLoading = false;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,6 +49,11 @@ const SignUpForm = () => {
     //Create user.
 
     const newUser = await createNewUser(values);
+
+    if (!newUser)
+      return toast({
+        title: "Sign up failed. Please try again",
+      });
 
     console.log("new User:", newUser);
   }
