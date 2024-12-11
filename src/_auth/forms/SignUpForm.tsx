@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Spinner } from "flowbite-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import {
   useQuery,
   useMutation,
@@ -24,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createNewUser, signInUser } from "@/lib/appwrite/api";
+import { useUserContext } from "@/context/AuthContext";
 
 const formSchema = z.object({
   name: z
@@ -39,8 +41,9 @@ const formSchema = z.object({
 });
 
 const SignUpForm = () => {
+  const navigate = useNavigate();
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const { toast } = useToast();
-  const isLoading = false;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +55,26 @@ const SignUpForm = () => {
     },
   });
 
+  // async function createNewPassword() {
+  //   const res = await api.post(apiRoutes.changePassword, watch());
+  //   return res.data;
+  // }
+
+  // const { mutate, isPending } = useMutation({
+  //   mutationFn: createNewPassword,
+  //   onSuccess: (data) => {
+  //     if (data?.success) {
+  //       back();
+  //       toast.success("password changed successfully");
+  //     } else {
+  //       toast.warning("an error occured");
+  //     }
+  //   },
+  //   onError: (error: AxiosError<{ message: string }>) => {
+  //     toast.error(error.response?.data.message as string);
+  //   },
+  // });
+
   /*{ submit handler }*/
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -61,7 +84,7 @@ const SignUpForm = () => {
 
     if (!newUser)
       return toast({
-        title: "Sign up failed. Please try again",
+        title: "Sign 1 up failed. Please try again",
       });
 
     //Sign in user.
@@ -72,10 +95,20 @@ const SignUpForm = () => {
 
     if (!session)
       return toast({
-        title: "Sign in failed. Please try again",
+        title: "Sign up 2 failed. Please try again",
       });
 
-    console.log("new User:", newUser);
+    const isLoggedIn = await checkAuthUser();
+
+    if (isLoggedIn) {
+      form.reset();
+      navigate("/");
+    } else {
+      return toast({
+        title: "Sign up 3 failed. Please try again",
+      });
+    }
+    // console.log("new User:", newUser);
   }
 
   return (
@@ -150,7 +183,7 @@ const SignUpForm = () => {
             )}
           />
           <Button type="submit" className="shad-button_primary mt-5">
-            {isLoading ? (
+            {isUserLoading ? (
               <Spinner aria-label="Default status example" />
             ) : (
               "Sign Up"
