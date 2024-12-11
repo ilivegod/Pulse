@@ -3,6 +3,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Spinner } from "flowbite-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 import {
   Form,
@@ -16,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { createNewUser } from "@/lib/appwrite/api";
+import { createNewUser, signInUser } from "@/lib/appwrite/api";
 
 const formSchema = z.object({
   name: z
@@ -45,6 +52,8 @@ const SignUpForm = () => {
     },
   });
 
+  /*{ submit handler }*/
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     //Create user.
 
@@ -53,6 +62,17 @@ const SignUpForm = () => {
     if (!newUser)
       return toast({
         title: "Sign up failed. Please try again",
+      });
+
+    //Sign in user.
+    const session = await signInUser({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (!session)
+      return toast({
+        title: "Sign in failed. Please try again",
       });
 
     console.log("new User:", newUser);

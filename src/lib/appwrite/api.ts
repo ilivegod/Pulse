@@ -29,6 +29,19 @@ export async function createNewUser(user:NewUSer) {
     }
 }
 
+export async function signInUser(user: {email: string ; password: string}){
+    try {
+       const session = await account.createEmailPasswordSession(user.email, user.password);
+
+       
+
+       return session;
+    } catch (error) {
+        console.log(error)
+        return
+    }
+}
+
 export async function saveUserToDB(user: {
     accountId: string,
     email: string,
